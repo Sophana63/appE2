@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @font-face {
+            font-family: Montserrat;
+            src: url("{{ url_for('static', filename='fonts/Montserrat-Regular.ttf') }}")  format('truetype');
+        }
+
+        @font-face {
+            font-family: Hind;
+            src: url("{{ url_for('static', filename='fonts/Hind-Regular.ttf') }}") format('truetype');
+        }
+
+        @font-face {
+            font-family: Playfair;
+            src: url("{{ url_for('static', filename='fonts/PlayfairDisplay-Regular.ttf') }}") format('truetype');
+        }
+
+        @font-face {
+            font-family: PlayfairBold;
+            src: url("{{ url_for('static', filename='fonts/PlayfairDisplay-SemiBold.ttf') }}") format('truetype');
+        }
+
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='highlightjs/default.min.css') }}" >
+    <script src="{{ url_for('static', filename='highlightjs/highlight.min.js') }}"></script>
+    {% block head %}{% endblock %}
+    <title>Maladies Cardiaques</title>
+</head>
+<body>
+    <header>
+        {% block header %}{% endblock %}        
+    </header>    
+
+    <div class="container">
+        <header class="blog-header py-3">
+            <div class="row flex-nowrap justify-content-between align-items-center">      
+              <div class="col-12 text-center">
+                <a class="blog-header-logo text-dark index-title" href="#">E2 - Les maladies cardiaques</a>
+              </div>      
+            </div>
+        </header>
+        
+        <div class="nav-scroller py-1 mb-3 border-bottom">
+          <nav class="nav nav-underline justify-content-between">
+            <a class="nav-item nav-link link-body-emphasis" href="{{ url_for('index') }}">HOME</a>
+            <a class="nav-item nav-link link-body-emphasis" href="{{ url_for('logisticregression') }}">LOGISTIC REGRESSION</a>
+            <a class="nav-item nav-link link-body-emphasis" href="{{ url_for('randomforest') }}">RANDOM FOREST</a>            
+            <a class="nav-item nav-link link-body-emphasis" href="{{ url_for('simulateur') }}">SIMULATEUR</a>            
+          </nav>
+        </div>
+    {% block content %}{% endblock %}
+    </div>
+
+    <!-- Import jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery-3.7.0.slim.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    {% block script %}{% endblock %}
+    <script>hljs.highlightAll();</script>
+</body>
+</html>

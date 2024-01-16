@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Amélioration avec RandomForest</h1>
+      <p class="lead my-3">
+        <pre>
+            <code class="language-python">
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+
+txt_best_score = ""
+best_score = 0
+best_model = None
+
+for y in range (5,15):
+    randomforest_classifier= RandomForestClassifier(n_estimators=y)
+    for i in range(2,10) :
+        score=cross_val_score(randomforest_classifier,x_train,y_train,cv=i)
+        txt = f"n_estimators = {y} & cv={i} : {score.mean()}"
+        print(txt)        
+        if score.mean() > best_score:
+            txt_best_score = txt
+            best_score = score.mean()
+            best_model = randomforest_classifier
+
+# Meilleur résultat:
+'n_estimators = 9 & cv=8 : 0.989018180087569'
+            </code>
+        </pre>
+      </p>      
+    </div>
+</div>
+
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+    <div class="card-body d-flex flex-column align-items-start">
+      <h3 class="mb-0">
+        <a class="text-dark" href="#">RandomForest bien meilleur, pourquoi?	</a>
+      </h3>
+      <div class="mb-1 text-muted">&nbsp;</div>
+      <p class="card-text mb-auto">
+        1. Capacité à modéliser des relations non linéaires : Les maladies cardiaques peuvent être influencées par des relations complexes et non linéaires entre les caractéristiques (variables d'entrée) et la présence de la maladie (variable cible). La régression logistique, étant un modèle linéaire, peut avoir du mal à capturer ces relations non linéaires, tandis que Random Forest, en tant que modèle ensembliste non paramétrique, est capable de modéliser des relations plus complexes et flexibles.
+        <br><br>
+        2. Gestion des interactions entre les caractéristiques : Les caractéristiques dans les données sur les maladies cardiaques peuvent interagir les unes avec les autres pour influencer la présence de la maladie. Random Forest, en construisant plusieurs arbres de décision indépendants, est capable de prendre en compte ces interactions entre les caractéristiques, ce qui peut améliorer la précision de la prédiction.
+        <br><br>
+        3. Robustesse aux valeurs aberrantes et aux données bruitées : Les données médicales peuvent contenir des valeurs aberrantes ou des bruits, ce qui peut affecter la performance des modèles. Random Forest est généralement plus robuste que la régression logistique face à ces données aberrantes et bruitées, car il agrège les prédictions de plusieurs arbres, ce qui atténue l'impact de valeurs aberrantes ou de données bruitées sur les résultats finaux.
+        <br><br>
+        4. Gestion de la multicollinéarité : Si vos caractéristiques présentent une certaine corrélation entre elles (multicollinéarité), cela peut affecter les performances de la régression logistique, car elle peut avoir du mal à distinguer l'effet spécifique de chaque caractéristique. Random Forest, en construisant des arbres indépendants, est moins sensible à la multicollinéarité et peut mieux gérer ce type de situation.
+        <br><br>
+
+        <h3 class="mb-0">
+            <a class="text-dark" href="#">Conclusion</a>
+        </h3>
+       </p>
+      <p class="card-text mb-auto">
+            Random Forest a généralement une meilleure capacité à modéliser des relations non linéaires complexes et peut offrir de bonnes performances prédictives. <br>
+            Cependant, il peut être plus lent à entraîner et à prédire que la régression logistique, en particulier pour de grandes quantités de données.
+      </p>      
+    </div>
+</div>
+
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Sauvegarde du nouveau modèle</h1>
+      <p class="lead my-3">
+        <pre>
+            <code class="language-python">
+import joblib
+
+# Séparez les caractéristiques (X) de la cible (y)
+X = data.drop('HeartDisease', axis=1)
+y = data['HeartDisease']
+
+# Divisez les données en ensemble d'entraînement et ensemble de test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialisez le modèle RandomForestClassifier
+randomforest_classifier = RandomForestClassifier(n_estimators=9)
+
+# Entraînez le modèle sur l'ensemble d'entraînement
+randomforest_classifier.fit(X_train, y_train)
+
+# Sauvegardez le modèle
+joblib.dump(randomforest_classifier, 'randomforest_model.joblib')
+
+# Vous pouvez maintenant utiliser le modèle pour faire des prédictions
+predictions = randomforest_classifier.predict(X_test)
+            </code>
+        </pre>
+      </p>      
+    </div>
+</div>
+
+{% endblock %}

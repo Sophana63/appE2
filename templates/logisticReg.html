@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Amélioration du modèle</h1>
+      <p class="lead my-3">
+        Précision à améliorer:
+        <ul>
+            <li>Précision test: 0.824390243902439</li>
+        </ul>       
+      </p>
+      <p class="lead my-3">
+        Etape 1 :
+        <ul>
+            <li>Sélection des colonnes à conserver en fonction de leur corrélation. Récupération des seuils au delà de 0.1 à 0.4</li>
+        </ul>
+        <pre>
+            <code class="language-python">
+('Précision train: 0.8575609756097561', ' Précision test: 0.8341463414634146', 'Seuil de corrélation : 0.0')
+('Précision train: 0.8585365853658536', ' Précision test: 0.8390243902439024', 'Seuil de corrélation : 0.1')
+('Précision train: 0.8390243902439024', ' Précision test: 0.8341463414634146', 'Seuil de corrélation : 0.2')
+('Précision train: 0.8526829268292683', ' Précision test: 0.8292682926829268', 'Seuil de corrélation : 0.3')
+('Précision train: 0.7902439024390244', ' Précision test: 0.7463414634146341', 'Seuil de corrélation : 0.4')	
+
+0.824390243902439 à 0.8390243902439024
+            </code>
+        </pre>
+      </p>
+      <p class="lead my-3">
+        Etape 2 - Modification des hyper-paramètres :
+        <ul>
+            <li>De base: Log_Reg = LogisticRegression(max_iter=1000)</li>
+            <li>Modifié: Log_Reg = LogisticRegression(max_iter=3000, solver="saga", random_state=10, class_weight= "balanced")</li>
+        </ul>
+        <pre>
+            <code class="language-python">
+('Précision train: 0.8497560975609756', ' Précision test: 0.8341463414634146', 'Seuil de corrélation : 0.0')
+('Précision train: 0.855609756097561', ' Précision test: 0.8341463414634146', 'Seuil de corrélation : 0.1')
+('Précision train: 0.8497560975609756', ' Précision test: 0.8439024390243902', 'Seuil de corrélation : 0.2')
+('Précision train: 0.8497560975609756', ' Précision test: 0.8292682926829268', 'Seuil de corrélation : 0.3')
+('Précision train: 0.7951219512195122', ' Précision test: 0.7463414634146341', 'Seuil de corrélation : 0.4')
+
+0.8390243902439024 à 0.8439024390243902
+            </code>
+        </pre>
+      </p>
+      <p class="lead my-3">
+        Etape 3
+        <ul>
+            <li>Normaliser les données des colonnes "RestingBP", "Cholesterol" et "MaxHR" (entre 0 et 1).</li>
+        </ul>
+        <pre>
+            <code class="language-markdown">
+# DataFrame
+
+    | Age | Sex | ChestPainType | RestingBP | Cholesterol | FastingBS | RestingECG | MaxHR | ExerciseAngina | Oldpeak | ST_Slope | ca | thal | HeartDisease |
+    |-----|-----|---------------|-----------|-------------|-----------|------------|-------|----------------|---------|----------|----|------|--------------|
+    | 53  |  1  |       0       |    140    |     203     |     1     |     0      |  155  |       1        |   3.1   |    0     |  0 |   3  |      0       |
+    | 54  |  0  |       2       |    135    |     304     |     1     |     1      |  170  |       0        |   0.0   |    2     |  0 |   2  |      1       |
+    | 57  |  0  |       0       |    128    |     303     |     0     |     0      |  159  |       0        |   0.0   |    2     |  1 |   2  |      1       |
+    | 53  |  1  |       2       |    130    |     197     |     1     |     0      |  152  |       0        |   1.2   |    0     |  0 |   2  |      1       |
+    | 59  |   1 |       0       |    138    |     271     |     0     |     0      |  182  |       0        |   0.0   |    2     |  0 |   2  |      1       |
+
+
+# Résultat
+
+('Précision train: 0.8663414634146341', ' Précision test: 0.8439024390243902', 'Seuil de corrélation : 0.0')
+('Précision train: 0.8663414634146341', ' Précision test: 0.848780487804878', 'Seuil de corrélation : 0.1')
+('Précision train: 0.8468292682926829', ' Précision test: 0.8439024390243902', 'Seuil de corrélation : 0.2')
+('Précision train: 0.8390243902439024', ' Précision test: 0.8195121951219512', 'Seuil de corrélation : 0.3')
+('Précision train: 0.7863414634146342', ' Précision test: 0.7414634146341463', 'Seuil de corrélation : 0.4')
+
+0.8439024390243902 à 0.848780487804878
+            </code>
+        </pre>
+      </p>      
+    </div>
+</div>
+
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Amélioration obtenue</h1>
+      <p class="lead my-3">
+        De 0.824390243902439 à 0.848780487804878 soit un gain de 2.39%
+      </p>      
+    </div>
+</div>
+{% endblock %}
+

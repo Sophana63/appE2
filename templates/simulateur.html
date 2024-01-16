@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Simulateur de maladie cardiaque</h1>
+      <p class="lead my-3">
+        <pre>
+            <code class="language-python">
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+
+txt_best_score = ""
+best_score = 0
+best_model = None
+
+for y in range (5,15):
+    randomforest_classifier= RandomForestClassifier(n_estimators=y)
+    for i in range(2,10) :
+        score=cross_val_score(randomforest_classifier,x_train,y_train,cv=i)
+        txt = f"n_estimators = {y} & cv={i} : {score.mean()}"
+        print(txt)        
+        if score.mean() > best_score:
+            txt_best_score = txt
+            best_score = score.mean()
+            best_model = randomforest_classifier
+
+# Meilleur résultat:
+'n_estimators = 9 & cv=8 : 0.989018180087569'
+            </code>
+        </pre>
+      </p>      
+    </div>
+</div>
+
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+    <div class="card-body d-flex flex-column align-items-start">
+      <h3 class="mb-0">
+        <a class="text-dark" href="#">RandomForest bien meilleur, pourquoi?	</a>
+      </h3>
+      <div class="mb-1 text-muted">&nbsp;</div>
+      <p class="card-text mb-auto">
+        <input type="submit" value="Entrainer le modèle" onclick="randomData()">
+        <table id="data-table" border="1">
+          <!-- Table headers -->
+          <tr>
+              <th>Age</th>
+              <th>Sex</th>
+              <th>ChestPainType</th>
+              <th>RestingBP</th>
+              <th>Cholesterol</th>
+              <th>FastingBS</th>
+              <th>RestingECG</th>
+              <th>MaxHR</th>
+              <th>ExerciseAngina</th>
+              <th>Oldpeak</th>
+              <th>ST_Slope</th>
+              <th>ca</th>
+              <th>thal</th>
+              <th>Predictions</th>
+          </tr>
+      </table>
+      </p>      
+    </div>
+</div>
+
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Sauvegarde du nouveau modèle</h1>
+      <p class="lead my-3">
+        <pre>
+            <code class="language-python">
+import joblib
+
+# Séparez les caractéristiques (X) de la cible (y)
+X = data.drop('HeartDisease', axis=1)
+y = data['HeartDisease']
+
+# Divisez les données en ensemble d'entraînement et ensemble de test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialisez le modèle RandomForestClassifier
+randomforest_classifier = RandomForestClassifier(n_estimators=9)
+
+# Entraînez le modèle sur l'ensemble d'entraînement
+randomforest_classifier.fit(X_train, y_train)
+
+# Sauvegardez le modèle
+joblib.dump(randomforest_classifier, 'randomforest_model.joblib')
+
+# Vous pouvez maintenant utiliser le modèle pour faire des prédictions
+predictions = randomforest_classifier.predict(X_test)
+            </code>
+        </pre>
+      </p>      
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+function randomData(){
+  console.log("heyyyyyy")
+  fetch(`${window.origin}/simulateur/radomdata`, {
+      method: "POST",
+      credentials: "include",
+      body: "",
+      headers: new Headers({
+          "content-type": "application/json"
+      })           
+  })
+  .then(function(response) {
+    if (response.status != 200) {
+      console.log(`Response status was not 200: ${response.status}`);
+      return ;
+    };
+
+    response.json().then(function(data) {                
+
+        console.log(data)
+        // Get the table element
+        const table = document.getElementById('data-table');
+
+        // Create rows and cells for the data
+        Object.keys(data['Age']).forEach((index) => {
+            const row = table.insertRow();
+            Object.keys(data).forEach((column) => {
+                const cell = row.insertCell();
+                cell.textContent = data[column][index];
+            });
+        });
+        
+    });
+                // table += "</table>"
+                // document.getElementById("players-scores").innerHTML = table;                
+                // // document.getElementById("today").innerHTML = choosen_date;
+                
+                // let yesterdayDate = new Date(Date.parse(newDate));  
+                // yesterdayDate.setDate(yesterdayDate.getDate() - 1);                
+                // let new_yesterdayDate = yesterdayDate.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                // new_yesterdayDate = new_yesterdayDate.replace(/\//g, '-');
+                // // document.getElementById("yesterday").innerHTML = new_yesterdayDate;
+
+                // let tomorrowDate = new Date(Date.parse(newDate));   
+                // tomorrowDate.setDate(tomorrowDate.getDate() + 1);                
+                // let new_tomorrowDate = tomorrowDate.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                // new_tomorrowDate = new_tomorrowDate.replace(/\//g, '-');
+                // // document.getElementById("tomorrow").innerHTML = new_tomorrowDate;
+
+  })
+       
+}
+</script>
+{% endblock %}

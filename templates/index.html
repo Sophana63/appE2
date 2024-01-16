@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Prédiction maladies cardiaques</h1>
+      <p class="lead my-3">Les maladies cardiaques sont l'une des principales causes de décès dans le monde, et leur prévention précoce est d'une importance capitale pour la santé publique. Dans le cadre de ce projet, j'ai utilisé un notebook Jupyter disponible sur Kaggle comme point de départ pour développer un modèle de prédiction des maladies cardiaques. Mon objectif était d'améliorer les performances du modèle existant en utilisant différentes techniques et approches.</p>
+      <p class="lead mb-0 font-italic">
+        <a href="https://www.kaggle.com/code/elouanguyon/pr-diction-maladies-cardiaques/notebook" target="_blank" class="text-warning font-weight-bold">Lien du Kaggle...</a>
+      </p>
+    </div>
+</div>
+
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+    <div class="card-body d-flex flex-column align-items-start">
+      <h3 class="mb-0">
+        <a class="text-dark" href="#">Explications des données</a>
+      </h3>
+      <div class="mb-1 text-muted">&nbsp;</div>
+      <p class="card-text mb-auto">
+        <table class="table">            
+            <tbody>
+              <tr>                
+                <td>
+                    <b>Age:</b> Âge lors de la crise cardiaque <br>
+                    <b>Sex:</b> Sexe de la personne <br>
+                    <b>ChestPainType:</b> Type de douleur à la poitrine <br>
+                    <b>RestingBP:</b> Pression artérielle au repos (mm Hg) <br>
+                    <b>Cholesterol:</b> Cholesterol du patient (mm/dl) <br>
+                    <b>FastingBS :</b> Glycémie à jeun du patient (1 si FastingBS > 120 mg/dl, 0 sinon) <br>
+                    <b>ST_Slope:</b> the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping] <br>
+                </td>
+                <td>
+                    <b>RestingECG:</b> Résultat des électrocardiogrammes au repos (Normal: Normale, ST: Ondes ST-T abnormales (Invesions onde T et/ou augmentaion ou réduction de > 0.05 mV des ondes ST), LVH: Hypertrophie probable ou définitive du ventricule gauche selon le critères d'Estes) <br>
+                    <b>MaxHR:</b> Fréquence cardiaque maximale (entre 60 et 202 bpm) <br>
+                    <b>ExerciseAngina:</b> Angine causée par l'exercice (Y: Oui, N: Non) <br>
+                    <b>Oldpeak:</b> oldpeak = ST [Numeric value measured in depression] <br>                    
+                    <b>HeartDisease:</b> Si le patient avait une maladie cardiaque (1: Oui, 0: Non)
+                </td>                
+              </tr>              
+            </tbody>
+          </table>
+      </p>      
+    </div>
+    <img class="card-img-right flex-auto d-none d-md-block" data-src="holder.js/200x250?theme=thumb" alt="Thumbnail [200x250]" style="width: 200px; height: 250px;" src="{{ url_for('static', filename='images/datas.jpg') }}" data-holder-rendered="true">
+</div>
+    
+
+    {{ vanillaData|safe }}
+
+<pre>
+    <code class="language-python">
+from sklearn.linear_model import LogisticRegression
+import sklearn
+# En faisant mes recherches, j'ai remarqué que beaucoup de gens utilisaient le paramètre max_iter 
+# de LogisticRegression alors j'ai décidé d'en tester quelques uns afin de trouver le nombre qui va 
+# maximiser mon résultat (je pense que le plus sera le mieux)
+
+# j'essayais max_iter avec 500 et il y avait des erreurs. Fonctionne avec 1000 et plus. Fonctionne à partir de 639. 
+# On peut voir que pour ce scénario, max_iter n'a pas d'importance
+for i in range(1000,20000,2500):
+Log_Reg = LogisticRegression(max_iter=i)
+modele=Log_Reg.fit(x_train, y_train)
+print("Précision train:",modele.score(x_train, y_train),"\n","Précision test:",modele.score(x_test,y_test))
+    </code>
+</pre>
+
+<div class="row mb-2">
+  <div class="col-md-6">
+    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+      <div class="col p-4 d-flex flex-column position-static">        
+        <h3 class="mb-0">Featured post</h3>
+        <div class="mb-1 text-body-secondary">&nbsp;</div>
+        <p class="card-text mb-auto"><pre>
+          Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         Précision train: 0.8536585365853658 
+          Précision test: 0.824390243902439
+         </pre></p>        
+      </div>      
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+      <div class="col p-4 d-flex flex-column position-static">
+        <h3 class="mb-0">LogisticRegression</h3>
+        <div class="mb-1 text-body-secondary">&nbsp;</div>
+        <p class="mb-auto">J'ai fait des recherches sur le type de régression à utiliser parce qu'il y en a beaucoup et je ne les connais pas toutes. Je suis tombé sur une vidéo qui explique brièvement quelle régression utiliser selon le scénario et dans mon cas, la "Binary Logistic Regression" serait la régression à effectuer dans mon cas (on cherche une réponse tranchée avec seulement deux options: oui on non (<a href="https://youtu.be/i8tjLQUPc8Y" rel=" noreferrer nofollow">https://youtu.be/i8tjLQUPc8Y</a>). Cela s'est confirmé quand j'ai trouvé un pdf de Claremont Graduate University dans lequel il est écrit que la "Binary Logistic Regression" est utilse lorsqu'on a affaire à un choix entre deux possibiéités. <a href="http://wise.cgu.edu/wp-content/uploads/2016/07/Introduction-to-Logistic-Regression.pdf" rel=" noreferrer nofollow">http://wise.cgu.edu/wp-content/uploads/2016/07/Introduction-to-Logistic-Regression.pdf</a></p>
+        <div class="mb-1 text-body-secondary">&nbsp;</div>
+        <h3 class="mb-0">Meilleur résultat</h3>       
+          <pre style="font-size: 1rem;"><strong>
+Précision train: 0.8536585365853658 
+Précision test: 0.824390243902439
+          </strong></pre>
+      </div>      
+    </div>
+  </div>
+</div>
+
+{% endblock %}
