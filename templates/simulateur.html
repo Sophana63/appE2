@@ -9,30 +9,7 @@
     <div class="col-md-12 px-0">
       <h1 class="display-8 font-italic">Simulateur de maladie cardiaque</h1>
       <p class="lead my-3">
-        <pre>
-            <code class="language-python">
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-
-txt_best_score = ""
-best_score = 0
-best_model = None
-
-for y in range (5,15):
-    randomforest_classifier= RandomForestClassifier(n_estimators=y)
-    for i in range(2,10) :
-        score=cross_val_score(randomforest_classifier,x_train,y_train,cv=i)
-        txt = f"n_estimators = {y} & cv={i} : {score.mean()}"
-        print(txt)        
-        if score.mean() > best_score:
-            txt_best_score = txt
-            best_score = score.mean()
-            best_model = randomforest_classifier
-
-# Meilleur résultat:
-'n_estimators = 9 & cv=8 : 0.989018180087569'
-            </code>
-        </pre>
+        Les tests peuvent être effectués de deux manières différentes. La première méthode consiste à générer cinq cas avec des caractéristiques aléatoires. Ces données sont générées en tranches minimales et maximales à partir de l’ensemble de données.
       </p>      
     </div>
 </div>
@@ -40,12 +17,13 @@ for y in range (5,15):
 <div class="card flex-md-row mb-4 box-shadow h-md-250">
     <div class="card-body d-flex flex-column align-items-start">
       <h3 class="mb-0">
-        <a class="text-dark" href="#">RandomForest bien meilleur, pourquoi?	</a>
+        <a class="text-dark" href="#">Simuler 5 patients aléatoires</a>
       </h3>
       <div class="mb-1 text-muted">&nbsp;</div>
       <p class="card-text mb-auto">
-        <input type="submit" value="Entrainer le modèle" onclick="randomData()">
-        <table id="data-table" border="1">
+        <p><input type="submit" value="Prédiction aléatoire" onclick="randomData()" class="w-100 btn btn-primary btn-lg"></input></p>
+          
+        <table class="table" id="data-table">
           <!-- Table headers -->
           <tr>
               <th>Age</th>
@@ -70,32 +48,134 @@ for y in range (5,15):
 
 <div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
     <div class="col-md-12 px-0">
-      <h1 class="display-8 font-italic">Sauvegarde du nouveau modèle</h1>
+      <h1 class="display-8 font-italic">#dfrgb</h1>
       <p class="lead my-3">
-        <pre>
-            <code class="language-python">
-import joblib
+        <form class="needs-validation" method="POST" action="{{ url_for('myPredict') }}">
+          <div class="row g-3">
+            <div class="col-sm-2">
+              <label for="firstName" class="form-label">Age</label>
+              <input type="number" class="form-control" id="age" placeholder="20 - 80" min="20" max="80" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
 
-# Séparez les caractéristiques (X) de la cible (y)
-X = data.drop('HeartDisease', axis=1)
-y = data['HeartDisease']
+            <div class="col-sm-2">
+              <label for="sex" class="form-label">Sexe (0: F, 1: H)</label>
+              <input type="number" class="form-control" id="sex" placeholder="0 - 1" min="0" max="1" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
 
-# Divisez les données en ensemble d'entraînement et ensemble de test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            <div class="col-sm-2">
+              <label for="chestpaintype" class="form-label">ChestPainType</label>
+              <input type="number" class="form-control" id="chestpaintype" placeholder="0 - 3" min="0" max="3" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
 
-# Initialisez le modèle RandomForestClassifier
-randomforest_classifier = RandomForestClassifier(n_estimators=9)
+            <div class="col-sm-2">
+              <label for="restingbp" class="form-label">RestingBP</label>
+              <input type="number" class="form-control" id="restingbp" placeholder="90 - 200" value=""min="90" max="200" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
 
-# Entraînez le modèle sur l'ensemble d'entraînement
-randomforest_classifier.fit(X_train, y_train)
+            <div class="col-sm-2">
+              <label for="cholesterol" class="form-label">Cholesterol</label>
+              <input type="number" class="form-control" id="cholesterol" placeholder="120 - 600" min="120" max="600" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
 
-# Sauvegardez le modèle
-joblib.dump(randomforest_classifier, 'randomforest_model.joblib')
+            <div class="col-sm-2">
+              <label for="fastingbs" class="form-label">FastingBS</label>
+              <input type="number" class="form-control" id="fastingbs" placeholder="0 - 1" min="0" max="1" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+          </div>
 
-# Vous pouvez maintenant utiliser le modèle pour faire des prédictions
-predictions = randomforest_classifier.predict(X_test)
-            </code>
-        </pre>
+          <h4 class="mb-3">&nbsp;</h4>
+
+          <div class="row g-3">
+            <div class="col-sm-2">
+              <label for="restingecg" class="form-label">RestingECG</label>
+              <input type="number" class="form-control" id="restingecg" placeholder="0 - 2" min="0" max="2" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+
+            <div class="col-sm-2">
+              <label for="maxhr" class="form-label">MaxHR</label>
+              <input type="number" class="form-control" id="maxhr" placeholder="70 - 210" min="70" max="210" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <label for="exerciseangina" class="form-label">ExerciseAngina</label>
+              <input type="number" class="form-control" id="exerciseangina" placeholder="0 - 1" min="0" max="1" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+
+            <div class="col-sm-2">
+              <label for="oldpeak" class="form-label">Oldpeak</label>
+              <input type="number" class="form-control" id="oldpeak" placeholder="0 - 7.0" min="0.0" max="7.0" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <label for="stslope" class="form-label">ST_Slope</label>
+              <input type="number" class="form-control" id="stslope" placeholder="0 - 2" min="0" max="2" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+
+            <div class="col-sm-2">
+              <label for="ca" class="form-label">CA</label>
+              <input type="number" class="form-control" id="ca" placeholder="0 - 4" min="0" max="4" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div>
+            
+          </div>
+
+            <h4 class="mb-3">&nbsp;</h4>
+
+          <div class="row g-3">
+            <div class="col-sm-2">
+              <label for="thal" class="form-label">Thal</label>
+              <input type="number" class="form-control" id="thal" placeholder="0 - 2" min="0" max="2" required>
+              <div class="invalid-feedback">
+                Ce champ est requis.
+              </div>
+            </div> 
+          </div>
+
+          <h4 class="mb-3">&nbsp;</h4>
+
+          <div class="row g-3">
+            <div class="col-sm-12">
+              <h3 class="hr-response">Rique de problème : <b id="response"> ***</b></h3>              
+            </div>
+
+          </div>          
+
+          <hr class="my-4">
+          <button class="w-100 btn btn-primary btn-lg" type="submit" onclick="predict_form()">Prédire</button>
+        </form> 
       </p>      
     </div>
 </div>
@@ -108,8 +188,7 @@ function randomData(){
   console.log("heyyyyyy")
   fetch(`${window.origin}/simulateur/radomdata`, {
       method: "POST",
-      credentials: "include",
-      body: "",
+      credentials: "include",      
       headers: new Headers({
           "content-type": "application/json"
       })           
@@ -120,13 +199,12 @@ function randomData(){
       return ;
     };
 
-    response.json().then(function(data) {                
-
-        console.log(data)
-        // Get the table element
+    response.json().then(function(data) {
         const table = document.getElementById('data-table');
-
-        // Create rows and cells for the data
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+        
         Object.keys(data['Age']).forEach((index) => {
             const row = table.insertRow();
             Object.keys(data).forEach((column) => {
@@ -136,24 +214,57 @@ function randomData(){
         });
         
     });
-                // table += "</table>"
-                // document.getElementById("players-scores").innerHTML = table;                
-                // // document.getElementById("today").innerHTML = choosen_date;
-                
-                // let yesterdayDate = new Date(Date.parse(newDate));  
-                // yesterdayDate.setDate(yesterdayDate.getDate() - 1);                
-                // let new_yesterdayDate = yesterdayDate.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                // new_yesterdayDate = new_yesterdayDate.replace(/\//g, '-');
-                // // document.getElementById("yesterday").innerHTML = new_yesterdayDate;
+  })       
+}
 
-                // let tomorrowDate = new Date(Date.parse(newDate));   
-                // tomorrowDate.setDate(tomorrowDate.getDate() + 1);                
-                // let new_tomorrowDate = tomorrowDate.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                // new_tomorrowDate = new_tomorrowDate.replace(/\//g, '-');
-                // // document.getElementById("tomorrow").innerHTML = new_tomorrowDate;
+function predict_form() {
+  event.preventDefault();
+  const form_data = new FormData();  
 
-  })
-       
+  age = document.getElementById("age").value;
+  sexe = document.getElementById("sex").value;
+  chestpaintype = document.getElementById("chestpaintype").value;
+  restingbp = document.getElementById("restingbp").value;
+  cholesterol = document.getElementById("cholesterol").value;
+  fastingbs = document.getElementById("fastingbs").value;
+  restingecg = document.getElementById("restingecg").value;
+  maxhr = document.getElementById("maxhr").value;
+  exerciseangina = document.getElementById("exerciseangina").value;
+  oldpeak = document.getElementById("oldpeak").value;
+  stslope = document.getElementById("stslope").value;
+  ca = document.getElementById("ca").value;
+  thal = document.getElementById("thal").value;
+
+  form_data.append("age", age);
+  form_data.append("sexe", sexe);
+  form_data.append('chestpaintype', chestpaintype);
+  form_data.append('restingbp', restingbp);
+  form_data.append('cholesterol', cholesterol);
+  form_data.append('fastingbs', fastingbs);
+  form_data.append('restingecg', restingecg);
+  form_data.append('maxhr', maxhr);
+  form_data.append('exerciseangina', exerciseangina);
+  form_data.append('oldpeak', oldpeak);
+  form_data.append('stslope', stslope);
+  form_data.append('ca', ca);
+  form_data.append('thal', thal);
+
+  console.log(form_data)
+
+  fetch(`${window.origin}/simulateur/mypredict`, {
+    method: "POST",
+    credentials: "include",
+    body: form_data, // envoie les données du formulaire
+    
+    })
+    .then(function (response) {
+      response.json().then(function(data) {
+        console.log(data);
+        respondeDiv = document.getElementById("response");
+        respondeDiv.innerText = data;
+      })
+
+    })
 }
 </script>
 {% endblock %}

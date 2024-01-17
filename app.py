@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 from sklearn.model_selection import train_test_split
-import plotly.express as px
+from sklearn.metrics import accuracy_score
+
+# import plotly.express as px
 import joblib
 
 data=pd.read_csv('data/heart.csv')
@@ -21,6 +23,9 @@ data=data.rename(columns = {
     'exang':'ExerciseAngina',
     'slope':'ST_Slope',
     'target':'HeartDisease'})
+
+min_max = data.agg(['min', 'max'])
+print(min_max)
 # train, test = train_test_split(data,test_size=0.2,random_state= 4)
 # train_data_num = train[["Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"]]
 
@@ -56,33 +61,78 @@ def randomData():
         data = {
         'Age': np.random.randint(40, 80, 5),
         'Sex': np.random.choice([0, 1], size=5),
-        'ChestPainType': np.random.choice([0], size=5),
-        'RestingBP': np.random.randint(120, 150, 5),
-        'Cholesterol': np.random.randint(170, 300, 5),
+        'ChestPainType': np.random.choice([0, 1, 2, 3], size=5),
+        'RestingBP': np.random.randint(90, 200, 5),
+        'Cholesterol': np.random.randint(120, 600, 5),
         'FastingBS': np.random.choice([0, 1], size=5),
-        'RestingECG': np.random.choice([1], size=5),
-        'MaxHR': np.random.randint(100, 180, 5),
+        'RestingECG': np.random.choice([0, 1, 2], size=5),
+        'MaxHR': np.random.randint(70, 210, 5),
         'ExerciseAngina': np.random.choice([0, 1], size=5),
-        'Oldpeak': np.random.uniform(0.0, 3.0, 5),
+        'Oldpeak': np.random.uniform(0.0, 7.0, 5),
         'ST_Slope': np.random.choice([0, 1, 2], size=5),
-        'ca': np.random.choice([0, 1, 2], size=5),
-        'thal': np.random.choice([2, 3], size=5)
+        'ca': np.random.choice([0, 1, 2, 3, 4], size=5),
+        'thal': np.random.choice([0, 1, 2, 3], size=5)
         }
 
         # Création du DataFrame
         df_random = pd.DataFrame(data)
-
+        print(df_random)
         # Load the saved model
         loaded_model = joblib.load('data/randomforest_model.joblib')
 
         # Use the trained model to make predictions on the new data
         predictions = loaded_model.predict(df_random)
-        df_random['Predictions'] = predictions
+        y_true = [2, 5]
+
+        # Calculer l'exactitude (accuracy)
+        accuracy = accuracy_score(y_true, predictions)
+
+        # Afficher l'exactitude en pourcentage
+        accuracy_percentage = accuracy * 100
+        print(accuracy_percentage)
+        df_random.insert(len(df_random.columns), 'Predictions', predictions)
+        # df_random['Predictions'] = predictions
 
         # 'predictions' now contains the predicted values (0 or 1) indicating the presence or absence of heart disease
         print("Predictions for heart disease:\n", predictions)
-        print(df_random.to_dict())
-    return df_random.to_dict()
+        print(df_random.to_json())
+    return df_random.to_json()
+
+@app.route("/simulateur/mypredict", methods=['POST', 'GET'])
+def myPredict():
+    if request.method == "POST":
+        data = request.form
+        params = {
+        'Age': {"0" : data["age"]},
+        'Sex': {"0" : data["sexe"]},
+        'ChestPainType': {"0" : data["chestpaintype"]},
+        'RestingBP': {"0" : data["restingbp"]},
+        'Cholesterol': {"0" : data["cholesterol"]},
+        'FastingBS': {"0" : data["fastingbs"]},
+        'RestingECG': {"0" : data["restingecg"]},
+        'MaxHR': {"0" : data["maxhr"]},
+        'ExerciseAngina': {"0" : data["exerciseangina"]},
+        'Oldpeak': {"0" : data["oldpeak"]},
+        'ST_Slope': {"0" : data["stslope"]},
+        'ca': {"0" : data["ca"]},
+        'thal': {"0" : data["thal"]}
+        }
+        
+        df_random = pd.DataFrame(params)
+        loaded_model = joblib.load('data/randomforest_model.joblib')
+        
+        predictions = loaded_model.predict(df_random)
+        df_random.insert(len(df_random.columns), 'Predictions', predictions)        
+
+        msg_predict = "aucun"
+        if predictions[0] == 1:
+            msg_predict = "forte chance"
+        elif predictions[0] != 1 and predictions[0] != 0:
+            msg_predict = "veuillez compléter tous les champs"
+
+        print("Predictions for heart disease:\n", predictions, msg_predict)
+
+    return jsonify(msg_predict)
 
 if __name__ == '__main__':
     app.run(host="localhost", port=8000, debug=True)

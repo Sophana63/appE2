@@ -19,3 +19,7 @@ table {
 table td {
     width: 50%;
 }
+
+.hr-response {
+    font-size: 1.6rem;
+}
