@@ -103,7 +103,7 @@ def randomData():
 @app.route("/simulateur/mypredict", methods=['POST', 'GET'])
 def myPredict():
     if request.method == "POST":
-        data = request.form
+        data = request.form        
         params = {
         'Age': {"0" : data["age"]},
         'Sex': {"0" : data["sexe"]},
@@ -119,20 +119,25 @@ def myPredict():
         'ca': {"0" : data["ca"]},
         'thal': {"0" : data["thal"]}
         }
-        
-        df_random = pd.DataFrame(params)
-        loaded_model = joblib.load('data/randomforest_model.joblib')
-        
-        predictions = loaded_model.predict(df_random)
-        df_random.insert(len(df_random.columns), 'Predictions', predictions)        
 
-        msg_predict = "aucun"
-        if predictions[0] == 1:
-            msg_predict = "forte chance"
-        elif predictions[0] != 1 and predictions[0] != 0:
+        checkdata = all(value !="" for value in data.values())
+
+        if checkdata:        
+            df_random = pd.DataFrame(params)
+            loaded_model = joblib.load('data/randomforest_model.joblib')
+            
+            predictions = loaded_model.predict(df_random)
+            df_random.insert(len(df_random.columns), 'Predictions', predictions)        
+
+            msg_predict = "aucun"
+            if predictions[0] == 1:
+                msg_predict = "forte chance"
+            elif predictions[0] != 1 and predictions[0] != 0:
+                msg_predict = "veuillez compléter tous les champs"
+
+            print("Predictions for heart disease:\n", predictions, msg_predict)
+        else:
             msg_predict = "veuillez compléter tous les champs"
-
-        print("Predictions for heart disease:\n", predictions, msg_predict)
 
     return jsonify(msg_predict)
 

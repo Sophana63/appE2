@@ -62,7 +62,7 @@
 
             <div class="col-sm-2">
               <label for="sex" class="form-label">Sexe (0: F, 1: H)</label>
-              <input type="number" class="form-control" id="sex" placeholder="0 - 1" min="0" max="1" required>
+              <input type="number" class="form-control" id="sexe" placeholder="0 - 1" min="0" max="1" required>
               <div class="invalid-feedback">
                 Ce champ est requis.
               </div>
@@ -180,12 +180,44 @@
     </div>
 </div>
 
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+  <div class="card-body d-flex flex-column align-items-start">
+    <h3 class="mb-0">
+      <a class="text-dark" href="#">Explications des données</a>
+    </h3>
+    <div class="mb-1 text-muted">&nbsp;</div>
+    <p class="card-text mb-auto">
+      <table class="table">            
+          <tbody>
+            <tr>                
+              <td>
+                  <b>Age:</b> Âge lors de la crise cardiaque <br>
+                  <b>Sex:</b> Sexe de la personne <br>
+                  <b>ChestPainType:</b> Type de douleur à la poitrine <br>
+                  <b>RestingBP:</b> Pression artérielle au repos (mm Hg) <br>
+                  <b>Cholesterol:</b> Cholesterol du patient (mm/dl) <br>
+                  <b>FastingBS :</b> Glycémie à jeun du patient (1 si FastingBS > 120 mg/dl, 0 sinon) <br>
+                  <b>ST_Slope:</b> the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping] <br>
+              </td>
+              <td>
+                  <b>RestingECG:</b> Résultat des électrocardiogrammes au repos (Normal: Normale, ST: Ondes ST-T abnormales (Invesions onde T et/ou augmentaion ou réduction de > 0.05 mV des ondes ST), LVH: Hypertrophie probable ou définitive du ventricule gauche selon le critères d'Estes) <br>
+                  <b>MaxHR:</b> Fréquence cardiaque maximale (entre 60 et 202 bpm) <br>
+                  <b>ExerciseAngina:</b> Angine causée par l'exercice (Y: Oui, N: Non) <br>
+                  <b>Oldpeak:</b> oldpeak = ST [Numeric value measured in depression] <br>                    
+                  <b>HeartDisease:</b> Si le patient avait une maladie cardiaque (1: Oui, 0: Non)
+              </td>                
+            </tr>              
+          </tbody>
+        </table>
+    </p>      
+  </div>
+</div>
+
 {% endblock %}
 
 {% block script %}
 <script>
 function randomData(){
-  console.log("heyyyyyy")
   fetch(`${window.origin}/simulateur/radomdata`, {
       method: "POST",
       credentials: "include",      
@@ -220,34 +252,14 @@ function randomData(){
 function predict_form() {
   event.preventDefault();
   const form_data = new FormData();  
+    
+  const fieldNames = ["age", "sexe", "chestpaintype", "restingbp", "cholesterol", "fastingbs", "restingecg", "maxhr", "exerciseangina", "oldpeak", "stslope", "ca", "thal"];
 
-  age = document.getElementById("age").value;
-  sexe = document.getElementById("sex").value;
-  chestpaintype = document.getElementById("chestpaintype").value;
-  restingbp = document.getElementById("restingbp").value;
-  cholesterol = document.getElementById("cholesterol").value;
-  fastingbs = document.getElementById("fastingbs").value;
-  restingecg = document.getElementById("restingecg").value;
-  maxhr = document.getElementById("maxhr").value;
-  exerciseangina = document.getElementById("exerciseangina").value;
-  oldpeak = document.getElementById("oldpeak").value;
-  stslope = document.getElementById("stslope").value;
-  ca = document.getElementById("ca").value;
-  thal = document.getElementById("thal").value;
-
-  form_data.append("age", age);
-  form_data.append("sexe", sexe);
-  form_data.append('chestpaintype', chestpaintype);
-  form_data.append('restingbp', restingbp);
-  form_data.append('cholesterol', cholesterol);
-  form_data.append('fastingbs', fastingbs);
-  form_data.append('restingecg', restingecg);
-  form_data.append('maxhr', maxhr);
-  form_data.append('exerciseangina', exerciseangina);
-  form_data.append('oldpeak', oldpeak);
-  form_data.append('stslope', stslope);
-  form_data.append('ca', ca);
-  form_data.append('thal', thal);
+  fieldNames.forEach(fieldName => {
+      const element = document.getElementById(fieldName);
+      const value = element ? element.value : "";
+      form_data.append(fieldName, value);
+  });
 
   console.log(form_data)
 
