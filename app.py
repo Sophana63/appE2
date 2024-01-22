@@ -24,6 +24,8 @@ data=data.rename(columns = {
     'slope':'ST_Slope',
     'target':'HeartDisease'})
 
+y_true = data["HeartDisease"]
+
 min_max = data.agg(['min', 'max'])
 print(min_max)
 # train, test = train_test_split(data,test_size=0.2,random_state= 4)
@@ -81,15 +83,15 @@ def randomData():
         loaded_model = joblib.load('data/randomforest_model.joblib')
 
         # Use the trained model to make predictions on the new data
-        predictions = loaded_model.predict(df_random)
-        y_true = [2, 5]
+        predictions = loaded_model.predict(df_random)        
 
         # Calculer l'exactitude (accuracy)
-        accuracy = accuracy_score(y_true, predictions)
+        # print(y_true)
+        # accuracy = accuracy_score(y_true, predictions)
 
         # Afficher l'exactitude en pourcentage
-        accuracy_percentage = accuracy * 100
-        print(accuracy_percentage)
+        # accuracy_percentage = accuracy * 100
+        # print(accuracy_percentage)
         df_random.insert(len(df_random.columns), 'Predictions', predictions)
         # df_random['Predictions'] = predictions
 
