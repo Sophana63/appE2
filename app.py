@@ -27,16 +27,25 @@ data=data.rename(columns = {
 y_true = data["HeartDisease"]
 
 min_max = data.agg(['min', 'max'])
-print(min_max)
-# train, test = train_test_split(data,test_size=0.2,random_state= 4)
-# train_data_num = train[["Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"]]
 
-# fig = px.bar(data, x='ChestPainType', color='HeartDisease', title='Nombre de cas de maladie cardiaque par type de douleur thoracique')
-# for column in data.columns[:-1]:
-#     fig = px.histogram(data, x=column, color='HeartDisease', title=f'Distribution de {column} par maladie cardiaque')    
-    
-#     # Sauvegarder chaque graphique en tant qu'image PNG
-#     fig.write_image(f'static/images/graphique_{column}_par_maladie_cardiaque.png')
+def allPredictions ():
+    model = joblib.load('data/randomforest_model.joblib')
+    old_model = joblib.load('data/modele_log_reg_2.joblib')
+
+    test = pd.read_csv('data/tests_data.csv').sample(n=20)
+    x_test = test.drop(columns=['HeartDisease'])
+
+    new_predictions = model.predict(x_test)
+    old_predictions = old_model.predict(x_test)
+    real_predictions = test['HeartDisease']
+
+    df_predictions = pd.DataFrame({
+        'Features Tests': test.index,          
+        'Old Predictions': old_predictions,
+        'New Predictions': new_predictions,
+        'Real Predictions': real_predictions
+    })
+    return df_predictions
 
 app = Flask(__name__)
 
@@ -56,6 +65,17 @@ def randomforest():
 @app.route("/simulateur")
 def simulateur():
     return render_template('simulateur.html')
+
+@app.route("/tests")
+def tests():
+    df_predictions = allPredictions()
+    return render_template('tests.html', predicts=df_predictions)
+
+@app.route("/simulateur/testmodel", methods=['POST', 'GET'])
+def testModel():
+    if request.method == 'POST':
+        df_predictions = allPredictions()
+    return df_predictions.to_json()
 
 @app.route("/simulateur/radomdata", methods=['POST', 'GET'])
 def randomData():
@@ -77,28 +97,28 @@ def randomData():
         }
 
         # Création du DataFrame
-        df_random = pd.DataFrame(data)
-        print(df_random)
+        df = pd.DataFrame(data)
+        
         # Load the saved model
         loaded_model = joblib.load('data/randomforest_model.joblib')
+        # old_model = joblib.load('data/modele_log_reg.joblib')
+        # old_model_2 = joblib.load('data/modele_log_reg_2.joblib')
 
         # Use the trained model to make predictions on the new data
-        predictions = loaded_model.predict(df_random)        
+        # df_random = pd.DataFrame(data)
+        predictions = loaded_model.predict(df)
+        # old_predictions = old_model.predict(old_df_random)
+        # old_predictions2 = old_model_2.predict(df_random)
 
-        # Calculer l'exactitude (accuracy)
-        # print(y_true)
-        # accuracy = accuracy_score(y_true, predictions)
+        print("predictions: ", predictions)
 
-        # Afficher l'exactitude en pourcentage
-        # accuracy_percentage = accuracy * 100
-        # print(accuracy_percentage)
-        df_random.insert(len(df_random.columns), 'Predictions', predictions)
+        df.insert(len(df.columns), 'Predictions', predictions)
         # df_random['Predictions'] = predictions
 
         # 'predictions' now contains the predicted values (0 or 1) indicating the presence or absence of heart disease
         print("Predictions for heart disease:\n", predictions)
-        print(df_random.to_json())
-    return df_random.to_json()
+        print(df.to_json())
+    return df.to_json()
 
 @app.route("/simulateur/mypredict", methods=['POST', 'GET'])
 def myPredict():

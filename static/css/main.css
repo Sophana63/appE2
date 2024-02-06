@@ -20,6 +20,20 @@ table td {
     width: 50%;
 }
 
+.no-border {
+    width: 100%;
+    border-top: 0;    
+}
+
+.no-border td {
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+
+
 .hr-response {
     font-size: 1.6rem;
 }

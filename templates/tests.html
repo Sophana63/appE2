@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+    <div class="col-md-12 px-0">
+      <h1 class="display-8 font-italic">Tests des modèles</h1>
+      <p class="lead my-3">
+        Test la différence entre l'ancien et le nouveau modèle via un jeu de test. Ce jeu comprend 205 lignes et le test se fait sur 25 lignes aléatoires. <br>
+        - la ligne surlignée représente une différence de prédiction de l'ancien modèle par rapport au résultat attendu.
+      </p>      
+    </div>
+</div>
+
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+  <div class="card-body d-flex flex-column align-items-start">
+    
+    <div class="mb-1 text-muted"></div>
+    <p class="card-text mb-auto">
+      <p style="margin: auto;">
+        <input type="submit" value="Afficher d'autres lignes" onclick="testModel()" class="w-100 btn btn-primary btn-lg"></input>
+      </p>
+
+      <div class="mb-1 text-muted">&nbsp;</div>
+        
+      <table class="table" id="data-table-test">
+        <!-- Table headers -->
+        <tr>
+            <th style="text-align: center;">Features Test</th>
+            <th style="text-align: center;">
+              <table class="table">
+                <tr>Predict</tr>
+                <tr>
+                  <td style="width: 33%;">Old model</td>
+                  <td style="width: 33%;">New Model</td>
+                  <td style="width: 33%;">Real predict</td>
+                </tr>
+              </table>
+            </th> <!-- Colonne regroupée -->
+        </tr>
+        {% for index, row in predicts.iterrows() %}
+        <tr {% if row['Old Predictions'] != row['Real Predictions'] %}style="background-color: lightcoral;"{% endif %}>
+            <td style="text-align: center;">{{ row['Features Tests'] }}</td><td style="text-align: center;">
+                <table class="no-border" style="margin: auto;" cellspacing="0">
+                    <tbody>
+                        <tr>
+                            <td class="blue" style="width: 33%; text-align: center; color:{% if row['Old Predictions'] != row['Real Predictions'] %}red{% else %}blue{% endif %};">{{ row['Old Predictions'] }}</td>
+                            <td class="blue" style="width: 33%; text-align: center; color: blue;">{{ row['New Predictions'] }}</td>
+                            <td class="blue" style="width: 33%; text-align: center; color: green;">{{ row['Real Predictions'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    </p>      
+  </div>
+</div>
+
+
+<div class="card flex-md-row mb-4 box-shadow h-md-250">
+  <div class="card-body d-flex flex-column align-items-start">
+    <h3 class="mb-0">
+      <a class="text-dark" href="#">Les features comprends les données suivantes :</a>
+    </h3>
+    <div class="mb-1 text-muted">&nbsp;</div>
+    <p class="card-text mb-auto">
+      <table class="table">            
+          <tbody>
+            <tr>                
+              <td>
+                  <b>Age:</b> Âge lors de la crise cardiaque <br>
+                  <b>Sex:</b> Sexe de la personne <br>
+                  <b>ChestPainType:</b> Type de douleur à la poitrine <br>
+                  <b>RestingBP:</b> Pression artérielle au repos (mm Hg) <br>
+                  <b>Cholesterol:</b> Cholesterol du patient (mm/dl) <br>
+                  <b>FastingBS :</b> Glycémie à jeun du patient (1 si FastingBS > 120 mg/dl, 0 sinon) <br>
+                  <b>ST_Slope:</b> the slope of the peak exercise ST segment [Up: upsloping, Flat: flat, Down: downsloping] <br>
+              </td>
+              <td>
+                  <b>RestingECG:</b> Résultat des électrocardiogrammes au repos (Normal: Normale, ST: Ondes ST-T abnormales (Invesions onde T et/ou augmentaion ou réduction de > 0.05 mV des ondes ST), LVH: Hypertrophie probable ou définitive du ventricule gauche selon le critères d'Estes) <br>
+                  <b>MaxHR:</b> Fréquence cardiaque maximale (entre 60 et 202 bpm) <br>
+                  <b>ExerciseAngina:</b> Angine causée par l'exercice (Y: Oui, N: Non) <br>
+                  <b>Oldpeak:</b> oldpeak = ST [Numeric value measured in depression] <br>                    
+                  <b>HeartDisease:</b> Si le patient avait une maladie cardiaque (1: Oui, 0: Non)
+              </td>                
+            </tr>              
+          </tbody>
+        </table>
+    </p>      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+function testModel() {
+    fetch(`${window.origin}/simulateur/testmodel`, {
+        method: "POST",
+        credentials: "include",
+        headers: new Headers({
+            "content-type": "application/json"
+        })
+    })
+    .then(function(response) {
+        if (response.status != 200) {
+            console.log(`Response status was not 200: ${response.status}`);
+            return;
+        };
+
+        response.json().then(function(data) {
+            const table = document.getElementById('data-table-test');
+            
+            // Effacer toutes les lignes sauf la première
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+
+            // Ajouter les données dans le tableau
+            for (let key in data['Features Tests']) {
+                if (data['Features Tests'].hasOwnProperty(key)) {
+                    let newRow = table.insertRow();
+                    let featureCell = newRow.insertCell();
+                    let predictCell = newRow.insertCell();
+                    
+                    // Centrer les cellules
+                    featureCell.style.textAlign = "center";
+                    predictCell.style.textAlign = "center";
+
+                    // Vérifier si les prédictions sont égales à la prédiction réelle
+                    let oldPredictionColor = (data['Old Predictions'][key] == data['Real Predictions'][key]) ? 'blue' : 'red';
+                    let newPredictionColor = (data['New Predictions'][key] == data['Real Predictions'][key]) ? 'blue' : 'red';
+                    let realPredictionColor = 'green';
+
+                    let isOldPredictionCorrect = (data['Old Predictions'][key] == data['Real Predictions'][key]);
+
+                    // Si les prédictions Old Predictions ne correspondent pas à la prédiction réelle, changer le style de fond de la ligne entière
+                    if (!isOldPredictionCorrect) {
+                        newRow.style.backgroundColor = 'lightcoral';
+                    }
+
+                    // Ajouter les données dans les cellules avec les couleurs spécifiées
+                    featureCell.textContent = key;
+                    predictCell.innerHTML = `
+                        <table class="no-border" style="margin: auto;" cellspacing="0">
+                            <tr>
+                                <td class="${oldPredictionColor}" style="width: 33%; text-align: center; color: ${oldPredictionColor};">${data['Old Predictions'][key]}</td>
+                                <td class="${oldPredictionColor}" style="width: 33%; text-align: center; color: ${newPredictionColor};">${data['New Predictions'][key]}</td>
+                                <td class="${oldPredictionColor}" style="width: 33%; text-align: center; color: ${realPredictionColor};">${data['Real Predictions'][key]}</td>
+                            </tr>
+                        </table>
+                    `;
+                }
+            }
+        });
+    });
+}
+
+</script>
+{% endblock %}
