@@ -39,6 +39,19 @@ def allPredictions ():
     old_predictions = old_model.predict(x_test)
     real_predictions = test['HeartDisease']
 
+    # identifie les cas où le modèle ancien a correctement prédit la maladie cardiaque, mais où le nouveau modèle a échoué.
+    test_x = test
+    test_x["oldpre"] = old_predictions
+    test_x["newpred"] = new_predictions
+    print(test_x[(test_x['oldpre'] == test_x['HeartDisease']) & (test_x['newpred'] != test_x['HeartDisease'])])
+    # renvoie un dataframe vide
+    
+    accuracy_old = accuracy_score(real_predictions, old_predictions)
+    print("Accuracy (old model):", accuracy_old)
+    
+    accuracy_new = accuracy_score(real_predictions, new_predictions)
+    print("Accuracy (new model):", accuracy_new)
+
     df_predictions = pd.DataFrame({
         'Features Tests': test.index,          
         'Old Predictions': old_predictions,
